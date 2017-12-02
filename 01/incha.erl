@@ -12,10 +12,8 @@ incha(State, [Head|Tail]) ->
   incha(State + check(Head, Tail), Tail);
 incha(State, []) -> State.
 
-check(_, []) -> 0;
-check(_, false) -> 0;
-check(Head, true) -> Head;
-check(Head, Tail) -> check(Head, Head =:= hd(Tail)).
+check(Head, [Head|_]) -> Head;
+check(_, _) -> 0.
 
 -ifdef(TEST).
 case_one_test() -> 3 = incha([1,1,2,2]).
