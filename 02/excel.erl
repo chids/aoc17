@@ -6,13 +6,8 @@
 -endif.
 
 excel(Spreadsheet) -> excel(0, Spreadsheet).
-excel(Checksum, [Row|Rows]) -> excel(Checksum + diff(Row), Rows);
+excel(Checksum, [Row|Rows]) -> excel(Checksum + (lists:max(Row) - lists:min(Row)), Rows);
 excel(Checksum, []) -> Checksum.
-
-
-diff([Current|Tail]) -> diff(Current, Current, Tail).
-diff(Min, Max, [Current|Tail]) -> diff(min(Min, Current), max(Max, Current), Tail);
-diff(Min, Max, []) -> Max - Min.
 
 -ifdef(TEST).
 case_one_test() -> 18 = excel([[5, 1, 9, 5], [7, 5, 3], [2, 4, 6, 8]]).
