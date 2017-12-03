@@ -10,18 +10,18 @@ excel2(Spreadsheet) -> excel(0, Spreadsheet).
 excel(Checksum, []) -> Checksum;
 excel(Checksum, [Head|Tail]) ->
   Row = array:from_list(Head),
-  excel(Checksum + row(array:size(Row) - 1, Row, 0), Tail).
+  excel(Checksum + row(0, 0, Row), Tail).
 
-row(-1, _, Result) -> Result;
-row(Index, Row, Result) -> 
-  XX = array:sparse_map(fun(Pos, Current) ->
-    Remainder = array:get(Index, Row) / Current,
-    case { floor(Remainder), ceil(Remainder) } of
-      {Whole, Whole} when Pos /= Index -> Whole;
-      {_, _} -> 0
+row(Index, Sum, Row) when Sum == 0 ->
+  Current = array:get(Index, Row),
+  Result = array:map(fun(Pos, Value) ->
+    case Current rem Value of
+      0 when Pos /= Index -> round(Current / Value);
+      _ -> 0
     end
   end, Row),
-  row(Index - 1, Row, Result + lists:sum(array:to_list(XX))).
+  row(Index + 1, Sum + lists:sum(array:to_list(Result)), Row);
+row(_, Sum, _) -> Sum.
 
 -ifdef(TEST).
 case_one_test() -> 4 = excel2([[5, 9, 2, 8]]).
