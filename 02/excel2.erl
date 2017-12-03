@@ -8,20 +8,13 @@
 excel2(Spreadsheet) -> excel(0, Spreadsheet).
 
 excel(Checksum, []) -> Checksum;
-excel(Checksum, [Head|Tail]) ->
-  Row = array:from_list(Head),
-  excel(Checksum + row(0, 0, Row), Tail).
+excel(Checksum, [Row|Rows]) ->
+  excel(Checksum + row(Row, Row, 0), Rows).
 
-row(Index, Sum, Row) when Sum == 0 ->
-  Current = array:get(Index, Row),
-  Result = array:map(fun(Pos, Value) ->
-    case Current rem Value of
-      0 when Pos /= Index -> round(Current / Value);
-      _ -> 0
-    end
-  end, Row),
-  row(Index + 1, Sum + lists:sum(array:to_list(Result)), Row);
-row(_, Sum, _) -> Sum.
+row([Current|Rest], All, Sum) ->
+  Result = [Current / Value || Value <- All, Current =/= Value, Current rem Value =:= 0],
+  row(Rest, All, Sum + round(lists:sum(Result)));
+row([], _, Sum) -> Sum.
 
 -ifdef(TEST).
 case_one_test() -> 4 = excel2([[5, 9, 2, 8]]).
