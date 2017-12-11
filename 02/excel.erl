@@ -1,17 +1,13 @@
 -module(excel).
 -author("marten.gustafson@gmail.com").
 -export([excel/1]).
--ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
--endif.
+
+case_one_test() -> 18 = excel([[5, 1, 9, 5], [7, 5, 3], [2, 4, 6, 8]]).
 
 excel(Spreadsheet) -> excel(0, Spreadsheet).
 excel(Checksum, [Row|Rows]) -> excel(Checksum + (lists:max(Row) - lists:min(Row)), Rows);
 excel(Checksum, []) -> Checksum.
-
--ifdef(TEST).
-case_one_test() -> 18 = excel([[5, 1, 9, 5], [7, 5, 3], [2, 4, 6, 8]]).
--endif.
 
 % For example, given the following spreadsheet:
 % 

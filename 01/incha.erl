@@ -1,9 +1,12 @@
 -module(incha).
 -author("marten.gustafson@gmail.com").
 -export([incha/1]).
--ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
--endif.
+
+case_one_test() -> 3 = incha([1,1,2,2]).
+case_two_test() -> 4 = incha([1,1,1,1]).
+case_three_test() -> 0 = incha([1,2,3,4]).
+case_four_test() -> 9 = incha([9,1,2,1,2,1,2,9]).
 
 incha(Numbers) ->
   incha(0, [hd(Numbers)|lists:reverse(Numbers)]).
@@ -14,13 +17,6 @@ incha(State, []) -> State.
 
 check(Head, [Head|_]) -> Head;
 check(_, _) -> 0.
-
--ifdef(TEST).
-case_one_test() -> 3 = incha([1,1,2,2]).
-case_two_test() -> 4 = incha([1,1,1,1]).
-case_three_test() -> 0 = incha([1,2,3,4]).
-case_four_test() -> 9 = incha([9,1,2,1,2,1,2,9]).
--endif.
 
 % The captcha requires you to review a sequence of digits (your puzzle input) and find the
 % sum of all digits that match the next digit in the list. The list is circular, so the
