@@ -1,16 +1,16 @@
 -module(bedug).
--export([bedug/1]).
 -include_lib("eunit/include/eunit.hrl").
+-define(PUZZLE1, [4,1,15,12,0,9,9,5,5,8,7,3,14,5,12,3]).
+-define(PUZZLE2, [0,14,13,12,11,10,8,8,6,6,5,3,3,2,1,10]).
 
-case_a_test() -> 5 = bedug([0, 2, 7, 0]).
+first(Banks) -> second(Banks) + 1.
+second(Banks) -> bedug(false, index(orddict:new(), Banks), sets:new()).
 
-bedug(Banks) -> bedug(false, index(orddict:new(), 0, Banks), sets:new()).
-
-bedug(true, Map, Seen) -> sets:size(Seen) + 1;
+bedug(true, _, Seen) -> sets:size(Seen);
 bedug(false, Map, Seen) ->
   {K, V, Map2} = pop(Map),
-  AA = spread(Map2, {K + 1, V}, orddict:size(Map2)),
-  bedug(sets:is_element(AA, Seen), AA, sets:add_element(AA, Seen)).
+  Map3 = spread(Map2, {K + 1, V}, orddict:size(Map2)),
+  bedug(sets:is_element(Map3, Seen), Map3, sets:add_element(Map3, Seen)).
 
 spread(Map, {_, 0}, _) -> Map;
 spread(Map, {K1, V}, Size) ->
@@ -25,8 +25,8 @@ pop(Map) ->
     end, {0, 0}, Map),
   {K, V, orddict:store(K, 0, Map)}.
 
-index(Map, Index, [Block|Blocks]) -> index(orddict:store(Index, Block, Map), Index + 1, Blocks);
-index(Map, _, []) -> Map.
+index(Map, [Block|Blocks]) -> index(orddict:store(orddict:size(Map), Block, Map), Blocks);
+index(Map, []) -> Map.
 
 mod(X, Y) when X > 0 -> X rem Y;
 mod(X, Y) when X < 0 -> Y + X rem Y;
@@ -46,3 +46,14 @@ mod(0, _) -> 0.
 % The third bank is chosen, and the same thing happens: 2 4 1 2.
 % At this point, we've reached a state we've seen before: 2 4 1 2 was already seen.
 % The infinite loop is detected after the fifth block redistribution cycle, and so the answer in this example is 5.
+case_part1_a_test() -> 5 = first([0, 2, 7, 0]).
+case_part1_b_test() -> 6681 = first(?PUZZLE1).
+
+% Out of curiosity, the debugger would also like to know the size of the loop:
+% starting from a state that has already been seen,
+% how many block redistribution cycles must be performed before that same state is seen again?
+%
+% In the example above, 2 4 1 2 is seen again after four cycles, and so the answer in that example would be 4.
+% How many cycles are in the infinite loop that arises from the configuration in your puzzle input?
+case_part2_a_test() -> 4 = second([2, 4, 1, 2]).
+case_part2_b_test() -> 2392 = second(?PUZZLE2).

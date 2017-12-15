@@ -1,20 +1,20 @@
 -module(jumparound).
--export([jumparound/1]).
 -include_lib("eunit/include/eunit.hrl").
 
-case_a_test() -> 5 = jumparound([0, 3, 0, 1, -3]).
 
-jumparound(Jumps) -> jumparound(index(dict:new(), 0, Jumps), 0, 0).
+first(Jumps) -> jumparound(fun(_) -> 1 end, index(dict:new(), Jumps), 0, 0).
+second(Jumps) -> jumparound(fun(Next) when Next >= 3 -> -1; (_) -> 1 end, index(dict:new(), Jumps), 0, 0).
 
-jumparound(Map, Count, Position) ->
+jumparound(Offset, Map, Count, Position) ->
   case dict:find(Position, Map) of
     error -> Count;
-    {ok, Next} -> jumparound(dict:store(Position, Next + 1, Map), Count + 1, Position + Next)
+    {ok, Next} -> Adjustment = Offset(Next),
+      jumparound(Offset, dict:store(Position, Next + Adjustment, Map), Count + 1, Position + Next)
   end.
 
-index(Map, Index, [Jump|Jumps]) -> index(dict:store(Index, Jump, Map), Index + 1, Jumps);
-index(Map, _, []) -> Map.
-  
+index(Map, [Jump|Jumps]) -> index(dict:store(dict:size(Map), Jump, Map), Jumps);
+index(Map, []) -> Map.
+
 %  Positive jumps ("f,orward") move downward; negative jumps move upward.
 %  For legibility in this example, these offset values will be written all on one line,
 %  with the current instruction marked in parentheses.
@@ -32,3 +32,14 @@ index(Map, _, []) -> Map.
 %   2  5  0  1  -2
 %    > jump 4 steps forward, escaping the maze.
 %  In this example, the exit is reached in 5 steps.
+case_part1_test() -> 5 = first([0, 3, 0, 1, -3]).
+% Now, the jumps are even stranger:
+%
+% after each jump, if the offset was three or more, instead decrease it by 1.
+% Otherwise, increase it by 1 as before.
+%
+% Using this rule with the above example, the process now takes 10 steps,
+% and the offset values after finding the exit are left as 2 3 2 3 -1.
+%
+% How many steps does it now take to reach the exit?
+case_part2_test() -> 10 = second([0, 3, 0, 1, -3]).
